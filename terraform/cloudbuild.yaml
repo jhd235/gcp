@@ -1,15 +1,20 @@
 steps:
-  # Install Terraform
+  # Install Terraform and set up credentials
   - name: 'hashicorp/terraform:1.7.0'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
         cd terraform
+        # Set up Google Cloud credentials
+        echo $GOOGLE_CREDENTIALS > /tmp/credentials.json
+        export GOOGLE_APPLICATION_CREDENTIALS=/tmp/credentials.json
+        
+        # Initialize Terraform
         terraform version
         terraform fmt -check -recursive
         terraform validate
-        terraform init
+        terraform init -backend-config="bucket=gcp-doe-iac-state" -backend-config="prefix=terraform/state"
         terraform plan -out=tfplan
 
   # Store the plan as an artifact
@@ -23,4 +28,6 @@ artifacts:
 
 timeout: '1200s'
 options:
-  logging: CLOUD_LOGGING_ONLY 
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - 'GOOGLE_CREDENTIALS=${_GOOGLE_CREDENTIALS}' 
