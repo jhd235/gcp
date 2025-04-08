@@ -19,5 +19,3 @@ terraform.tfstate.lock.info
 # OS
 .DS_Store
 Thumbs.db
-
-# terraform/soy-transducer-455914-i5-eb4acc5d0af2.json

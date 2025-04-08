@@ -1,8 +1,4 @@
 steps:
-  # Install Terraform and set up credentials
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['auth', 'activate-service-account', '--key-file=/workspace/terraform/soy-transducer-455914-i5-eb4acc5d0af2.json']
-
   # Run Terraform commands
   - name: 'hashicorp/terraform:1.7.0'
     entrypoint: 'sh'
