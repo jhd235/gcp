@@ -102,4 +102,4 @@ resource "google_project_iam_member" "cloudbuild_resource_manager" {
   project = var.project_id
   role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
-} 
+}

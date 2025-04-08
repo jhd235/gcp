@@ -5,6 +5,7 @@ steps:
     args:
       - '-c'
       - |
+        cd terraform
         terraform version
         terraform fmt -check -recursive
         terraform validate
@@ -13,12 +14,12 @@ steps:
 
   # Store the plan as an artifact
   - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', 'tfplan', 'gs://gcp-doe-iac-state/terraform/plans/$${BUILD_ID}-plan']
+    args: ['cp', 'terraform/tfplan', 'gs://gcp-doe-iac-state/terraform/plans/$${BUILD_ID}-plan']
 
 artifacts:
   objects:
     location: 'gs://gcp-doe-iac-state/terraform/plans/'
-    paths: ['tfplan']
+    paths: ['terraform/tfplan']
 
 timeout: '1200s'
 options:
