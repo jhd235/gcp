@@ -1,5 +1,5 @@
 steps:
-  # Install Terraform
+  # Run Terraform commands
   - name: 'hashicorp/terraform:1.7.0'
     entrypoint: 'sh'
     args:
@@ -9,7 +9,7 @@ steps:
         terraform version
         terraform fmt -check -recursive
         terraform validate
-        terraform init
+        terraform init -backend-config="bucket=gcp-doe-iac-state" -backend-config="prefix=terraform/state"
         terraform plan -out=tfplan
 
   # Store the plan as an artifact

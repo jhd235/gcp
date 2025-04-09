@@ -20,4 +20,11 @@ module "cloudbuild" {
   github_owner   = var.github_owner
   github_repo    = var.github_repo
   branch_pattern = "^main$"
+}
+
+# Store service account key in Secret Manager
+module "secret_manager" {
+  source = "./modules/secret-manager"
+
+  service_account_key_json = file("./soy-transducer-455914-i5-eb4acc5d0af2.json")
 } 
