@@ -33,6 +33,12 @@ variable "force_destroy" {
   default     = false
 }
 
+variable "github_token" {
+  description = "GitHub personal access token"
+  type        = string
+  sensitive   = true
+}
+
 # Cloud Build Variables
 variable "project_id" {
   description = "The GCP project ID"
