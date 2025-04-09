@@ -35,6 +35,11 @@ jobs:
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Write credentials to file
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+          chmod 600 credentials.json
+
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
@@ -46,11 +51,15 @@ jobs:
 
       - name: Terraform Validate
         id: validate
-        run: terraform validate -var="google_credentials=${{ secrets.GOOGLE_CREDENTIALS }}"
+        run: |
+          export TF_VAR_google_credentials="$(cat credentials.json)"
+          terraform validate
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -var="google_credentials=${{ secrets.GOOGLE_CREDENTIALS }}"
+        run: |
+          export TF_VAR_google_credentials="$(cat credentials.json)"
+          terraform plan -no-color
         continue-on-error: true
 
       - name: Update Pull Request
