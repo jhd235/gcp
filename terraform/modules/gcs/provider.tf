@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  project     = "soy-transducer-455914-i5"
-  region      = "europe-west10"
-  credentials = file("../../soy-transducer-455914-i5-eb4acc5d0af2.json")
+  project = "soy-transducer-455914-i5"
+  region  = "europe-west10"
+  # Credentials will be read from GOOGLE_APPLICATION_CREDENTIALS environment variable
 } 

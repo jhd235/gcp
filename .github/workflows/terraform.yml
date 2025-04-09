@@ -46,11 +46,11 @@ jobs:
 
       - name: Terraform Validate
         id: validate
-        run: terraform validate
+        run: terraform validate -var="google_credentials=${{ secrets.GOOGLE_CREDENTIALS }}"
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color -var="google_credentials=${{ secrets.GOOGLE_CREDENTIALS }}"
         continue-on-error: true
 
       - name: Update Pull Request
