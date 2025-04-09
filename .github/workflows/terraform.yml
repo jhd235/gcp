@@ -45,6 +45,12 @@ jobs:
         run: terraform fmt -check
         continue-on-error: true
 
+      - name: Force Unlock State (if needed)
+        run: |
+          export TF_VAR_google_credentials="$(cat credentials.json)"
+          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
+          terraform force-unlock -force 1744197461798472 || true
+
       - name: Terraform Init
         id: init
         run: terraform init
