@@ -19,3 +19,6 @@ terraform.tfstate.lock.info
 # OS
 .DS_Store
 Thumbs.db
+
+# Service account keys
+*.json
