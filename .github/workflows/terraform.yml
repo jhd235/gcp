@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   TF_VERSION: "1.7.0"
@@ -30,33 +31,42 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
-          create_credentials_file: true
-          credentials_file_path: ./credentials.json
 
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
+
+      - name: Write credentials to file
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+          chmod 600 credentials.json
 
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
 
+      - name: Force Unlock State (if needed)
+        run: |
+          export TF_VAR_google_credentials="$(cat credentials.json)"
+          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
+          terraform force-unlock -force 1744197461798472 || true
+
       - name: Terraform Init
         id: init
-        run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
-          terraform init
+        run: terraform init
 
       - name: Terraform Validate
         id: validate
         run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
+          export TF_VAR_google_credentials="$(cat credentials.json)"
+          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
           terraform validate
 
       - name: Terraform Plan
         id: plan
         run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
+          export TF_VAR_google_credentials="$(cat credentials.json)"
+          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
           terraform plan -no-color
         continue-on-error: true
 

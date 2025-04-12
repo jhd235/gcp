@@ -26,5 +26,5 @@ module "cloudbuild" {
 module "secret_manager" {
   source = "./modules/secret-manager"
 
-  service_account_key_json = file("./soy-transducer-455914-i5-eb4acc5d0af2.json")
+  service_account_key_json = var.google_credentials
 } 

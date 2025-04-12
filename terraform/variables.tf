@@ -33,6 +33,12 @@ variable "force_destroy" {
   default     = false
 }
 
+variable "google_credentials" {
+  description = "Google Cloud credentials JSON"
+  type        = string
+  sensitive   = true
+}
+
 variable "github_token" {
   description = "GitHub personal access token"
   type        = string
