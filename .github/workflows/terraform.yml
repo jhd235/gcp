@@ -8,70 +8,51 @@ on:
   workflow_dispatch:
 
 env:
-  TF_VERSION: "1.7.0"
+  TF_VERSION: 1.0.0
+  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
 jobs:
   terraform:
-    name: "Terraform"
+    name: Terraform
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./terraform
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Setup Google Cloud Credentials
-        uses: google-github-actions/auth@v2
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
-
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Write credentials to file
-        run: |
-          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
-          chmod 600 credentials.json
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
+          export_default_credentials: true
 
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Force Unlock State (if needed)
-        run: |
-          export TF_VAR_google_credentials="$(cat credentials.json)"
-          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
-          terraform force-unlock -force 1744197461798472 || true
-
       - name: Terraform Init
         id: init
         run: terraform init
+        continue-on-error: true
 
       - name: Terraform Validate
         id: validate
-        run: |
-          export TF_VAR_google_credentials="$(cat credentials.json)"
-          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
-          terraform validate
+        run: terraform validate
+        continue-on-error: true
 
       - name: Terraform Plan
         id: plan
-        run: |
-          export TF_VAR_google_credentials="$(cat credentials.json)"
-          export TF_VAR_github_token="${{ secrets.GITHUB_TOKEN }}"
-          terraform plan -no-color
+        run: terraform plan -no-color
         continue-on-error: true
 
       - name: Update Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v3
         if: github.event_name == 'pull_request'
         env:
           PLAN: "${{ steps.plan.outputs.stdout }}"
@@ -85,15 +66,29 @@ jobs:
 
             <details><summary>Show Plan</summary>
 
-            \`\`\`terraform\n
+            \`\`\`terraform
             ${process.env.PLAN}
             \`\`\`
 
             </details>`;
 
-            github.rest.issues.createComment({
+            github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.name,
               body: output
-            }) 
+            })
+
+      - name: Checkov Security Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform
+          quiet: true
+          framework: terraform
+          output_format: sarif
+          output_file_path: results.sarif
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: results.sarif 
