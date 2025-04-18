@@ -1,7 +1,7 @@
 # Outputs for GCS module
 output "bucket_name" {
   description = "The name of the created GCS bucket"
-  value       = module.gcs.bucket_name
+  value       = google_storage_bucket.state.name
 }
 
 output "bucket_url" {
@@ -10,9 +10,9 @@ output "bucket_url" {
 }
 
 # Outputs for Cloud Build module
-output "cloudbuild_trigger_id" {
+output "trigger_id" {
   description = "The ID of the created Cloud Build trigger"
-  value       = module.cloudbuild.trigger_id
+  value       = google_cloudbuild_trigger.pipeline.id
 }
 
 output "cloudbuild_trigger_name" {
@@ -21,9 +21,10 @@ output "cloudbuild_trigger_name" {
 }
 
 # Outputs for Secret Manager module
-output "secret_manager_secret_id" {
-  description = "The ID of the created Secret Manager secret"
-  value       = module.secret_manager.secret_id
+output "secret_id" {
+  description = "The ID of the created secret in Secret Manager"
+  value       = google_secret_manager_secret.service_account_key.id
+  sensitive   = true
 }
 
 output "secret_manager_secret_version" {

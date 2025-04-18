@@ -15,55 +15,45 @@ terraform {
   required_version = ">= 1.0.0"
 }
 
-provider "google" {
-  project = var.project_id
-  region  = var.region
+# Create GCS bucket for Terraform state
+resource "google_storage_bucket" "state" {
+  name          = var.bucket_name
+  location      = var.location
+  storage_class = var.storage_class
+  force_destroy = var.force_destroy
+
+  versioning {
+    enabled = true
+  }
 }
 
-# Create GCS bucket for Terraform state and general storage
-module "gcs" {
-  source = "./modules/gcs"
+# Create Cloud Build trigger
+resource "google_cloudbuild_trigger" "pipeline" {
+  name        = var.trigger_name
+  description = "Terraform pipeline trigger"
+  project     = var.project_id
 
-  bucket_name        = var.bucket_name
-  location           = var.location
-  storage_class      = var.storage_class
-  versioning_enabled = var.versioning_enabled
-  lifecycle_age      = var.lifecycle_age
-  force_destroy      = var.force_destroy
+  github {
+    owner = var.github_owner
+    name  = var.github_repo
+    push {
+      branch = var.branch_pattern
+    }
+  }
+
+  filename = "cloudbuild.yaml"
 }
 
-# Create Cloud Build pipeline for CI/CD
-module "cloudbuild" {
-  source = "./modules/cloudbuild"
-
-  trigger_name   = var.trigger_name
-  project_id     = var.project_id
-  project_number = var.project_number
-  github_owner   = var.github_owner
-  github_repo    = var.github_repo
-  branch_pattern = var.branch_pattern
+# Store service account key in Secret Manager
+resource "google_secret_manager_secret" "service_account_key" {
+  secret_id = "terraform-service-account-key"
+  
+  replication {
+    auto {}
+  }
 }
 
-# Store service account key in Secret Manager securely
-module "secret_manager" {
-  source = "./modules/secret-manager"
-
-  service_account_key_json = var.google_credentials
-}
-
-# Output important information
-output "gcs_bucket_name" {
-  description = "The name of the created GCS bucket"
-  value       = module.gcs.bucket_name
-}
-
-output "cloudbuild_trigger_id" {
-  description = "The ID of the created Cloud Build trigger"
-  value       = module.cloudbuild.trigger_id
-}
-
-output "secret_manager_secret_id" {
-  description = "The ID of the created secret in Secret Manager"
-  value       = module.secret_manager.secret_id
-  sensitive   = true
+resource "google_secret_manager_secret_version" "service_account_key" {
+  secret      = google_secret_manager_secret.service_account_key.id
+  secret_data = var.google_credentials
 } 

@@ -5,10 +5,10 @@ project_id     = "your-project-id"
 project_number = "your-project-number"
 github_owner   = "your-github-username"
 github_repo    = "your-repo-name"
-trigger_name   = "your-trigger-name"
+trigger_name   = "terraform-pipeline"
 
 # GCS Configuration (if needed)
-bucket_name        = "your-bucket-name"
+bucket_name        = "your-project-id-terraform-state"
 location           = "US"
 storage_class      = "STANDARD"
 versioning_enabled = false

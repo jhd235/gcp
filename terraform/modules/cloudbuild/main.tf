@@ -12,8 +12,8 @@ resource "google_cloudbuild_trigger" "terraform_pipeline" {
   }
 
   included_files = [
-    "terraform/vm-config/*.tf",
-    "terraform/vm-config/*.tfvars"
+    "terraform/**/*.tf",
+    "terraform/**/*.tfvars"
   ]
 
   build {
@@ -30,31 +30,31 @@ resource "google_cloudbuild_trigger" "terraform_pipeline" {
     step {
       name = "hashicorp/terraform:1.7.0"
       args = ["fmt", "-check", "-recursive"]
-      dir  = "terraform/vm-config"
+      dir  = "terraform"
     }
 
     step {
       name = "hashicorp/terraform:1.7.0"
       args = ["validate"]
-      dir  = "terraform/vm-config"
+      dir  = "terraform"
     }
 
     step {
       name = "hashicorp/terraform:1.7.0"
-      args = ["init", "-backend-config=bucket=${var.project_id}-terraform-state"]
-      dir  = "terraform/vm-config"
+      args = ["init"]
+      dir  = "terraform"
     }
 
     step {
       name = "hashicorp/terraform:1.7.0"
       args = ["plan", "-out=tfplan"]
-      dir  = "terraform/vm-config"
+      dir  = "terraform"
     }
 
     step {
       name = "hashicorp/terraform:1.7.0"
       args = ["apply", "-auto-approve", "tfplan"]
-      dir  = "terraform/vm-config"
+      dir  = "terraform"
     }
 
     artifacts {
