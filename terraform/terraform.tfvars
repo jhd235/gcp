@@ -1,16 +1,20 @@
 # Root level variables can be added here if needed 
 
 # Cloud Build Configuration
-project_id     = "soy-transducer-455914-i5"
-project_number = "109297754786"
-github_owner   = "jhd235"
-github_repo    = "gcp"
-trigger_name   = "triggerGH"
+project_id     = "your-project-id"
+project_number = "your-project-number"
+github_owner   = "your-github-username"
+github_repo    = "your-repo-name"
+trigger_name   = "your-trigger-name"
 
 # GCS Configuration (if needed)
-bucket_name        = "gcp-doe-iac-state" # Using existing bucket name
-location           = "EU"                # Matching existing bucket location
+bucket_name        = "your-bucket-name"
+location           = "US"
 storage_class      = "STANDARD"
-versioning_enabled = true # Matching existing bucket versioning
+versioning_enabled = false
 lifecycle_age      = 30
-force_destroy      = false 
+force_destroy      = false
+
+# Additional variables
+region            = "us-central1"
+branch_pattern    = "^main$" 

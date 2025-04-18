@@ -5,6 +5,21 @@
 # Variable definitions are in variables.tf
 # Backend configuration is in backend.tf
 
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0"
+    }
+  }
+  required_version = ">= 1.0.0"
+}
+
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
+
 # Create GCS bucket for Terraform state and general storage
 module "gcs" {
   source = "./modules/gcs"
@@ -15,8 +30,6 @@ module "gcs" {
   versioning_enabled = var.versioning_enabled
   lifecycle_age      = var.lifecycle_age
   force_destroy      = var.force_destroy
-  project_id         = var.project_id
-  environment        = var.environment
 }
 
 # Create Cloud Build pipeline for CI/CD
@@ -29,7 +42,6 @@ module "cloudbuild" {
   github_owner   = var.github_owner
   github_repo    = var.github_repo
   branch_pattern = var.branch_pattern
-  environment    = var.environment
 }
 
 # Store service account key in Secret Manager securely
@@ -37,8 +49,6 @@ module "secret_manager" {
   source = "./modules/secret-manager"
 
   service_account_key_json = var.google_credentials
-  project_id              = var.project_id
-  environment            = var.environment
 }
 
 # Output important information
