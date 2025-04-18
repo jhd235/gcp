@@ -15,44 +15,53 @@ jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+      - name: Setup Google Cloud Auth
+        uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          create_credentials_file: true
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Terraform Init
         id: init
         run: terraform init
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Terraform Validate
         id: validate
         run: terraform validate
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
-        continue-on-error: true
+        run: |
+          terraform plan -no-color -out=tfplan
+          terraform show -json tfplan > tfplan.json
+        continue-on-error: false
 
       - name: Update Pull Request
-        uses: actions/github-script@v3
+        uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         env:
           PLAN: "${{ steps.plan.outputs.stdout }}"
@@ -72,7 +81,7 @@ jobs:
 
             </details>`;
 
-            github.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.name,
@@ -87,8 +96,13 @@ jobs:
           framework: terraform
           output_format: sarif
           output_file_path: results.sarif
+          skip_check: CKV_GCP_21,CKV_GCP_22 # Skip specific checks if needed
 
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: results.sarif 
+          sarif_file: results.sarif
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan 

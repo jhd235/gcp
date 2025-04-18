@@ -15,12 +15,8 @@ module "gcs" {
   versioning_enabled = var.versioning_enabled
   lifecycle_age      = var.lifecycle_age
   force_destroy      = var.force_destroy
-
-  tags = {
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Project     = var.project_id
-  }
+  project_id         = var.project_id
+  environment        = var.environment
 }
 
 # Create Cloud Build pipeline for CI/CD
@@ -33,12 +29,7 @@ module "cloudbuild" {
   github_owner   = var.github_owner
   github_repo    = var.github_repo
   branch_pattern = var.branch_pattern
-
-  tags = {
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Project     = var.project_id
-  }
+  environment    = var.environment
 }
 
 # Store service account key in Secret Manager securely
@@ -46,14 +37,8 @@ module "secret_manager" {
   source = "./modules/secret-manager"
 
   service_account_key_json = var.google_credentials
-  secret_id               = var.secret_id
-  project_id             = var.project_id
-
-  tags = {
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Project     = var.project_id
-  }
+  project_id              = var.project_id
+  environment            = var.environment
 }
 
 # Output important information
