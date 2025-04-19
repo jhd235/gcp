@@ -1,8 +1,10 @@
 steps:
-  # Install Terraform
+  # Combined Terraform Init & Plan with shared context
   - name: 'hashicorp/terraform:1.11.4'
-    entrypoint: 'terraform'
-    args: ['init']
+    entrypoint: 'sh'
+    args: 
+      - '-c'
+      - 'terraform init && terraform plan -input=false -out=tfplan'
 
 options:
-  logging: CLOUD_LOGGING_ONLY 
+  logging: CLOUD_LOGGING_ONLY
