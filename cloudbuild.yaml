@@ -1,6 +1,8 @@
 steps:
-  - name: 'ubuntu'
-    args: ['echo', 'hello world']
+  # Install Terraform
+  - name: 'hashicorp/terraform:1.11.4'
+    entrypoint: 'terraform'
+    args: ['init']
 
 options:
   logging: CLOUD_LOGGING_ONLY 
