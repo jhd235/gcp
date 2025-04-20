@@ -1,10 +1,24 @@
 steps:
-  # Combined Terraform Init & Plan with shared context
+  # Initialize Terraform in the VM module directory
   - name: 'hashicorp/terraform:1.11.4'
     entrypoint: 'sh'
     args: 
       - '-c'
-      - 'terraform init && terraform plan -input=false -out=tfplan'
+      - 'cd modules/vm && terraform init'
+
+  # Plan the VM module changes
+  - name: 'hashicorp/terraform:1.11.4'
+    entrypoint: 'sh'
+    args: 
+      - '-c'
+      - 'cd modules/vm && terraform plan -input=false -out=tfplan'
+
+  # Apply the VM module changes
+  - name: 'hashicorp/terraform:1.11.4'
+    entrypoint: 'sh'
+    args: 
+      - '-c'
+      - 'cd modules/vm && terraform apply -input=false tfplan'
 
 options:
   logging: CLOUD_LOGGING_ONLY
