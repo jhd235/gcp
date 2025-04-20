@@ -6,14 +6,14 @@ steps:
       - '-c'
       - 'cd modules/vm && terraform init'
 
-  # Plan the VM module changes
+  # Plan the VM module destruction
   - name: 'hashicorp/terraform:1.11.4'
     entrypoint: 'sh'
     args: 
       - '-c'
-      - 'cd modules/vm && terraform plan -input=false -out=tfplan'
+      - 'cd modules/vm && terraform plan -destroy -input=false -out=tfplan'
 
-  # Apply the VM module changes
+  # Apply the VM module destruction
   - name: 'hashicorp/terraform:1.11.4'
     entrypoint: 'sh'
     args: 
@@ -21,4 +21,4 @@ steps:
       - 'cd modules/vm && terraform apply -input=false tfplan'
 
 options:
-  logging: CLOUD_LOGGING_ONLY
+  logging: CLOUD_LOGGING_ONLY 
