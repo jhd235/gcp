@@ -1,0 +1,14 @@
+all:
+  children:
+    ubuntu_servers:
+      hosts:
+        my-vm:
+          ansible_host: ${GCP_VM_IP}  # Replace with your VM's public IP
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa
+    debian_servers:
+      hosts:
+        my-vm-instance:
+          ansible_host: ${GCP_VM_INSTANCE_IP}  # Replace with your VM's public IP
+          ansible_user: debian
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa 

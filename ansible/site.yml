@@ -1,0 +1,50 @@
+---
+- name: Configure Ubuntu Servers
+  hosts: ubuntu_servers
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install common packages
+      apt:
+        name:
+          - curl
+          - git
+          - htop
+          - vim
+        state: present
+
+    - name: Create admin user
+      user:
+        name: admin
+        groups: sudo
+        shell: /bin/bash
+        state: present
+
+- name: Configure Debian Servers
+  hosts: debian_servers
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install common packages
+      apt:
+        name:
+          - curl
+          - git
+          - htop
+          - vim
+        state: present
+
+    - name: Create admin user
+      user:
+        name: admin
+        groups: sudo
+        shell: /bin/bash
+        state: present 
